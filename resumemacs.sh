@@ -126,9 +126,10 @@ function make_latex_pdf {
     local src_name=$(basename "${src_file%.*}")
     local header_file="${src_dir}/personal_info.org"
 
-    local redirect=
     local ext=pdf
     local export_to=pdf
+    local redirect_out=/dev/stdout
+    local redirect_err=/dev/stderr
 
     # export to latex only, or all the way to PDF?
     if [ "$make_pdf" = false ]; then
@@ -144,14 +145,18 @@ function make_latex_pdf {
 
     # ... then export org to latex to pdf
     echo "emacs: exporting to $ext ..."
-    _is_zero $DEBUG && redirect=">/dev/null 2>&1"
+    if _is_zero $DEBUG; then
+        redirect_out=/dev/null
+        redirect_err=/dev/null
+    fi
 
     emacs \
         -u "$USER" \
         --batch \
         --eval '(load user-init-file)' \
         "$src_file" \
-        -f org-latex-export-to-${export_to} "$redirect"
+        -f org-latex-export-to-${export_to} \
+        >${redirect_out} 2>${redirect_err}
 
     # Sanity check and move to target dir if different from source dir
     if [[ ! -f "${src_dir}/${src_name}.${ext}" ]]; then
