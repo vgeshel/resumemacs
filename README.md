@@ -43,9 +43,9 @@ The easiest way to use `resumemacs` is to rely on some defaults: it expects the 
 
 1. After installing, copy the `example` to `resume` and rename `example.org` to `resume.org`, and `example.sh` to `resume.sh`.
 
-2. Then open `output/resume.org` in `emacs` and write the body of your CV.
+2. Then open `resume/resume.org` in `emacs` and write the body of your CV.
 
-3. Next open `output/resume.sh` and edit the personal info, and the remote settings for your webserver.
+3. Next open `resume/resume.sh` and edit the personal info, and the remote settings for your webserver.
 
 Then just run the script like this:
 
@@ -57,7 +57,7 @@ Then just run the script like this:
 ./resumemacs /path/to/resume.org -d output -p
 ```
 
-Open `resume/resume.html` in your browser to work on the style, and view `resume/resume.pdf` in your PDF viewer.
+Open `output/resume.html` in your browser to work on the style, and view `output/resume.pdf` in your PDF viewer.
 
 ## Advanced Usage
 
