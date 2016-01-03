@@ -6,10 +6,13 @@ DRY résumé builder for `emacs`. Write your résumé in `org-mode` then create 
 
 Built using `shkeleton`, my shell CLI wireframe: https://github.com/joseph8th/shkeleton
 
+### PDF
 ![PDF](http://joseph8th.com/static/images/resumemacs-pdf.png)
 
+### HTML
 ![HTML](http://joseph8th.com/static/images/resumemacs-html.png)
 
+### ODT
 ![ODT](http://joseph8th.com/static/images/resumemacs-odt.png)
 
 ## Install
