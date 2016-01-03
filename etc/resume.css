@@ -1,4 +1,69 @@
 body {
-  font-family: Droid Sans, Helvetica, Arial, sans serif;
+  font-family: Droid Sans, Helvetica, Arial, san serif;
   margin: 20px 15%;
+}
+
+header h1.title {
+  text-align: center;
+  font-size: 3em;
+  margin-bottom: 0.5rem;
+  font-variant: small-caps;
+  font-family: Georgia, "Times New Roman", serif;
+  border: none;
+}
+
+.subtitle1, .subtitle2 {
+  text-align: center;
+  font-weight: bold;
+}
+
+.subtitle1 {
+  font-size: x-large;
+}
+
+.subtitle2 {
+  font-size: larger;
+}
+
+h1 {
+  font-size: x-large;
+  padding-bottom: 0.1em;
+  border-bottom: grey 1px solid;
+}
+
+h2 {
+  font-size: large;
+  margin-bottom: 0;
+}
+
+h3 {
+  font-size: medium;
+  margin-bottom: 0;
+}
+
+h3 + p {
+  margin-top: 0;
+}
+
+table.personal-info {
+  margin-top: 1em;
+  border-top: black 1px solid;
+  border-bottom: black 1px solid;
+  width: 100%;
+}
+
+table.personal-info td {
+  text-align: center;
+}
+
+table.personal-info td:first-child {
+  text-align: left;
+}
+
+table.personal-info td:last-child {
+  text-align: right;
+}
+
+li p {
+  margin: 0.5em 0;
 }

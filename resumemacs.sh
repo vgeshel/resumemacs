@@ -22,11 +22,11 @@ SELF_ARGS="ORGFILE"
 
 SELF_OPTS_NOARG="h help v version"
 SELF_OPTS="o only p publish c config d dest"
-SELF_OPTARGS=( [o]="TYPE" [c]="CFGFILE" [d]="DEST" )
+SELF_OPTARGS=( [o]="TYPES" [c]="CFGFILE" [d]="DEST" )
 SELF_OPTS_HELP=( \
     [h]="print help message" \
     [v]="print version information" \
-    [o]="only convert ORGFILE to TYPE in [pdf, html, odt]" \
+    [o]="only convert ORGFILE to TYPES in [pdf, html, odt]" \
     [p]="publish to webserver specified in config" \
     [c]="use external CFGFILE instead of config in ${SCRIPT_SH}" \
     [d]="output directory DEST (default: dirname ORGFILE)" \
@@ -56,13 +56,17 @@ readonly TMP_DIR="${SCRIPT_DIR}/tmp"
 readonly VALID_EXTS=( pdf html )
 
 readonly CFG_KEYS=( \
-    HTML_BASE_TEMPLATE \
     PERSONAL_INFO_TEMPLATES \
+    HTML_BASE_TEMPLATE \
+    ODT_BASE_TEMPLATE \
+    ODT_REFERENCE \
     CSS_LOCAL \
     )
 declare -A readonly DEFAULT_FILES=( \
-    [HTML_BASE_TEMPLATE]="${SCRIPT_DIR}/etc/default.html5" \
     [PERSONAL_INFO_TEMPLATES]="${SCRIPT_DIR}/etc/personal_info_templates.sh" \
+    [HTML_BASE_TEMPLATE]="${SCRIPT_DIR}/etc/default.html5" \
+    [ODT_BASE_TEMPLATE]="${SCRIPT_DIR}/etc/default.opendocument" \
+    [ODT_REFERENCE]="${SCRIPT_DIR}/etc/odt_reference.odt" \
     [CSS_LOCAL]="${SCRIPT_DIR}/etc/resume.css" \
 )
 
@@ -118,11 +122,13 @@ function make_latex_pdf {
     local target_dir="$1"; shift
     local make_pdf="$1"
 
-    local ext=pdf
-    local export_to=pdf
     local src_dir=$(dirname "$src_file")
     local src_name=$(basename "${src_file%.*}")
     local header_file="${src_dir}/personal_info.org"
+
+    local redirect=
+    local ext=pdf
+    local export_to=pdf
 
     # export to latex only, or all the way to PDF?
     if [ "$make_pdf" = false ]; then
@@ -138,14 +144,14 @@ function make_latex_pdf {
 
     # ... then export org to latex to pdf
     echo "emacs: exporting to $ext ..."
+    _is_zero $DEBUG && redirect=">/dev/null 2>&1"
 
     emacs \
         -u "$USER" \
         --batch \
         --eval '(load user-init-file)' \
         "$src_file" \
-        -f org-latex-export-to-${export_to} \
-        >/dev/null 2>&1
+        -f org-latex-export-to-${export_to} "$redirect"
 
     # Sanity check and move to target dir if different from source dir
     if [[ ! -f "${src_dir}/${src_name}.${ext}" ]]; then
@@ -155,6 +161,41 @@ function make_latex_pdf {
     fi
 
     [[ -f "${target_dir}/${src_name}.${ext}" ]]
+}
+
+function make_odt {
+    local src_file=$1; shift
+    local target_dir=$1
+
+    local src_name=$(basename "${src_file%.*}")
+    local header_file="${TMP_DIR}/personal_info_odt.xml"
+    local target_file="${target_dir}/${src_name}.odt"
+
+    # Make sure LaTEX file exists, else make it ...
+    if [[ ! -f "$src_file" ]]; then
+        make_latex_pdf "$src_file" "$target_dir" false
+        exit_on_error $? "emacs org-latex-export-to-latex failed"
+    fi
+
+    # 1st create the .odt header file ...
+    echo "$SCRIPT: creating personal info ODT ..."
+
+    make_info_header PERSONAL_INFO_ODT "$header_file"
+    exit_on_error $? "file not found: '$header_file'"
+
+    # ... then convert LaTEX to ODT
+    echo "pandoc: converting LaTEX to ODT ..."
+
+    pandoc \
+        --from=latex \
+        --to=odt \
+        --template="$ODT_BASE_TEMPLATE" \
+        --reference-odt="$ODT_REFERENCE" \
+        --include-before-body="$header_file" \
+        --output="$target_file" \
+        "$src_file"
+
+    [[ -f "$target_file" ]]
 }
 
 function make_html {
@@ -231,8 +272,11 @@ function _run_self {
             v)  echo "$SCRIPT $VERSION"; _exit_err ;;
             d)  target_dir=$( _trim "${OPTARGS[d]}" ) ;;
             c)  cfg_file=$( _trim "${OPTARGS[c]}" ) ;;
-            o)  make_only=$( _trim "${OPTARGS[o]}" ) ;;
             p)  publish=true ;;
+            o)
+                eval make_only=$( _trim "${OPTARGS[o]}" )
+                make_only=( ${make_only[@]} )
+                ;;
         esac
     done
 
@@ -267,13 +311,19 @@ function _run_self {
     source "$PERSONAL_INFO_TEMPLATES"
 
     # Make PDF?
-    if _is_empty $make_only || _str_equal $make_only "pdf"; then
+    if _is_empty $make_only || _in_array "pdf" make_only[@]; then
         make_latex_pdf "$src_file" "$target_dir" true
         exit_on_error $? "emacs org-latex-export-to-pdf failed"
     fi
 
+    # Make ODT?
+    if _is_empty $make_only || _in_array "odt" make_only[@]; then
+        make_odt "${src_dir}/${src_name}.tex" "$target_dir"
+        exit_on_error "pandoc latex to odt conversion failed"
+    fi
+
     # Make HTML?
-    if _is_empty $make_only || _str_equal $make_only "html"; then
+    if _is_empty $make_only || _in_array "html" make_only[@]; then
         make_html "${src_dir}/${src_name}.tex" "$target_dir" $publish
         exit_on_error "pandoc latex to html conversion failed"
     fi

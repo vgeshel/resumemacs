@@ -6,6 +6,12 @@ DRY résumé builder for `emacs`. Write your résumé in `org-mode` then create 
 
 Built using `shkeleton`, my shell CLI wireframe: https://github.com/joseph8th/shkeleton
 
+![](http://joseph8th.com/static/images/resumemacs-pdf.png | width=200)
+
+![](http://joseph8th.com/static/images/resumemacs-html.png | width=200)
+
+![](http://joseph8th.com/static/images/resumemacs-odt.png | width=200)
+
 ## Install
 
 ```bash
@@ -55,6 +61,9 @@ Then just run the script like this:
 
 # Build and upload ...
 ./resumemacs /path/to/resume.org -d output -p
+
+# Build only PDF and HTML and upload ...
+./resumemacs /path/to/resume.org -d output -o \"pdf html\" -p
 ```
 
 Open `output/resume.html` in your browser to work on the style, and view `output/resume.pdf` in your PDF viewer.
@@ -68,3 +77,8 @@ Open `output/resume.html` in your browser to work on the style, and view `output
 * *HTML_BASE_TEMPLATE*: The base `pandoc` HTML template is in `etc/default.html5`. Similarly you can either modify it in place, or specify a different template using the `HTML_BASE_TEMPLATE` setting in your config file.
 
 * *CSS_LOCAL*: Similarly, you can use different stylesheets by specifying a path in the `CSS_LOCAL` setting in your config file.
+
+## Acknowledgments
+
+* Pandoc templates based on [Pandoc default templates](https://github.com/jgm/pandoc-templates).
+* Org-mode to LaTEX template based on [this org-mode résumé template](https://github.com/punchagan/resume) by Puneeth Chagati.

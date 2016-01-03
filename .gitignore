@@ -5,4 +5,5 @@ TAGS
 man/
 tmp/
 sync/
-output/
+output*/
+resume/
