@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+# Docker wrapper for ./resumemacs
+
+# All directories should be children of the directory containing this script and the specified paths should be relative to that.
+
+cd $(dirname $0)
+
+docker run -it --rm -v `pwd`:/work -w /work strages/pandoc-docker ./resumemacs $*
